@@ -1,0 +1,13 @@
+
+
+ReadTimeOutHandler的作用是读超时时向后传递异常
+
+idleStatehandler的作用是读超时或写超时向后传递空闲事件
+SocketLinkState是对ReadTimeOutHandler和idleStatehandler进行处理，对ReadTimeOutHandler抛出的异常在exceptionCaught中进行处理，并关闭channel，
+channelIdle则是捕获住相关事件进行处理，在本例中，未对读超时进行处理，因为在ReadTimeOutHandler已经进行处理了。针对写超时，采用心跳机制唤醒。
+在上节中，我们对超时机制进行了处理，但很多情况下超时并非逻辑错误而是业务空闲，在这种情况下，我们并不想关闭channel，所以我们一般定义一个写超时，这个写超时的时间间隔一般比读超时短很多(new IdleStateHandler(trigger,60,5,0)读超时为60s，写超时为5s)，这样子如果间隔5s，没有写操作，则我们向peer发送一个心跳(短字节)唤醒对方，SocketLinkState的channelIdle中对WRITER_IDLE执行SocketHeartBeat.sendHeartBeat(channel);这样通过心跳保证两端的通道一直连接。
+
+   //
+   pipeline.addLast(new IdleStateHandler(30 * 60, 0 , 0), new ClientHeartBeatHandler(),
+        new HttpServerCodec(ServerConfig.MAX_INITIALLINE_LENGTH, ServerConfig.MAX_HEADER_SIZE, ServerConfig.MAX_CHUNK_SIZE ),
+        new HttpObjectAggregator(ServerConfig.MAX_REQUEST_SIZE), new ProxyFrontendHandler());

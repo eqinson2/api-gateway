@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration scan="true" scanPeriod="30 seconds">
+    <pattern line.separator=" #012" />
+
+    <appender name="HEART_FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/data/log/me.ele.arch.gateway.mainsite/heart.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>/data/log/me.ele.arch.gateway.mainsite/heart.log.%i</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>5</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>2GB</maxFileSize>
+        </triggeringPolicy>
+        <encoder />
+    </appender>
+
+    <appender name="FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/data/log/me.ele.arch.gateway.mainsite/aries.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>/data/log/me.ele.arch.gateway.mainsite/aries.log.%i</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>5</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>2GB</maxFileSize>
+        </triggeringPolicy>
+        <encoder />
+    </appender>
+
+    <!-- save error to another log-->
+    <appender name="ERROR_FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>/data/log/me.ele.arch.gateway.mainsite/error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>/data/log/me.ele.arch.gateway.mainsite/error.log.%i</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>5</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>1GB</maxFileSize>
+        </triggeringPolicy>
+        <encoder />
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <logger name="me.ele.jarch.aries.nginx.ConfigMeta.Check" additivity="false">
+        <appender-ref ref="HEART_FILE" />
+    </logger>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- encoder的默认实现类是ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <!--<appender name="SYSLOG" class="me.ele.elog.appender.SyslogAppender">-->
+        <!--<syslogHost>localhost</syslogHost>-->
+        <!--<facility>LOCAL6</facility>-->
+    <!--</appender>-->
+
+    <!--<appender name="ASYNC" class="me.ele.elog.appender.AsyncAppender">-->
+        <!--<buffer size="2048" />-->
+        <!--&lt;!&ndash;<appender-ref ref="SYSLOG"/>&ndash;&gt;-->
+        <!--<appender-ref ref="FILE"/>-->
+        <!--<appender-ref ref="ERROR_FILE"/>-->
+    <!--</appender>-->
+
+    <root level="INFO">
+        <appender-ref ref="FILE" />
+        <appender-ref ref="ERROR_FILE"/>
+        <appender-ref ref="HEART_FILE"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>
