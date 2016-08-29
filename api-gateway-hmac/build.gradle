@@ -1,0 +1,56 @@
+buildscript {
+    apply from: "$rootProject.projectDir/../prop.gradle"
+
+	repositories { maven { url "$gmRepoUrl" } }
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
+    	classpath("org.springframework:springloaded:$springloadedVersion")
+	}
+}
+
+apply plugin: "java"
+apply plugin: "war"
+apply plugin: "maven"
+
+apply plugin: 'spring-boot'
+
+apply from: "$rootProject.projectDir/../base.gradle"
+
+description = "API GateWay HMAC"
+
+configurations {
+    all*.exclude group:"org.freemarker", module:"freemarker"
+	all*.exclude module: "commons-logging"
+}
+
+dependencies {
+	//compile ("${project.group}:dip-appbox-stub:${project.version}")
+	compile ("${project.group}:dip-common:${project.version}")
+	compile ("${project.group}:dip-framework:${project.version}"){
+		transitive = false
+	}
+	
+	compile("org.apache.shiro:shiro-spring:1.2.3"){
+		exclude group:"org.slf4j"
+	}
+
+	compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+	compile("org.springframework.boot:spring-boot-starter-jdbc:${springBootVersion}")
+	
+	// dubbo
+//	compile ("com.alibaba:dubbo:$dubboVersion") { transitive = false }
+//	compile "org.javassist:javassist:3.18.2-GA"
+//	compile "org.jboss.netty:netty:3.2.5.Final"
+//	compile("com.101tec:zkclient:0.4"){ transitive = false }
+//	compile("org.apache.zookeeper:zookeeper:3.3.1"){ transitive = false }
+	
+	runtime "mysql:mysql-connector-java:$mysqlVersion"
+	testCompile "com.h2database:h2:$h2Version"
+
+    compile "com.alibaba:fastjson:1.2.5"
+	compile "org.apache.httpcomponents:httpclient:$httpClientVersion"
+
+    testCompile "junit:junit:$junitVersion"
+    testCompile "org.mockito:mockito-core:$mockitoVersion"
+	testCompile "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+}

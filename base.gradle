@@ -1,0 +1,131 @@
+apply plugin: "java"
+apply plugin: "maven"
+apply plugin: "eclipse"
+apply plugin: "eclipse-wtp"
+apply plugin: "idea"
+
+group = "com.cdjdgm"
+version = "1.1.2-SNAPSHOT"
+
+sourceCompatibility=1.8
+targetCompatibility=1.8
+
+[compileJava, compileTestJava]*.options*.compilerArgs = ["-Xlint:none"]
+[compileJava, compileTestJava]*.options*.encoding = "UTF-8"
+    
+ext {
+    
+    if (project.hasProperty("profile")) {
+        //System.setProperty("spring.profiles.active", project["profile"])
+        profile = project["profile"]
+    } else  {
+        //System.setProperty("spring.profiles.active", "dev")
+        profile = "dev"
+    }
+    profiles =  ["dev", "prod", "demo"]
+
+    
+    serverRoot = "tomcat_dip"
+    if ("idev" == profile) {
+        serverIP = "192.168.230.207"
+        serverAccount = "itp"
+        serverPwd = "itp"
+    } else if ("demo" == profile) {
+       serverIP = "192.168.230.151"
+       serverAccount = "idbp"
+       serverPwd = "idbp"
+    }
+
+}
+
+repositories {
+    mavenLocal()
+    maven { url "$gmRepoUrl" }
+    //maven { url "http://mvnrepo.tae.taobao.com/content/groups/public/" }
+    //maven { url "http://repository.sonatype.org/content/groups/public/" }
+    //jcenter()
+    //mavenCentral()
+    //maven { url "http://maven.oschina.net/content/groups/public/" }
+}
+
+configurations {
+    deployerJars
+    sshAntTask
+
+    provided {
+		dependencies.all { dep ->
+        	configurations.default.exclude group: dep.group, module: dep.name
+        }
+    }
+    compile.extendsFrom provided
+
+    all{
+        resolutionStrategy {
+            cacheDynamicVersionsFor 0, "seconds"
+            cacheChangingModulesFor 0, "seconds"
+        }
+    }
+
+    all*.exclude group:"org.slf4j", module:"slf4j-log4j12"
+}
+
+dependencies {
+	deployerJars "org.apache.maven.wagon:wagon-http:2.2"
+	sshAntTask "org.apache.ant:ant-jsch:1.7.1", "jsch:jsch:0.1.29"
+}
+
+test{
+    systemProperties "file.encoding": "UTF-8"
+    //systemProperties["browser"] = "htmlunit"
+    testLogging.showStandardStreams = true
+}
+
+javadoc {
+    options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
+    options.author = true
+    options.header = project.name
+    options.encoding = "UTF-8"
+    //options.overview = "${projectDir}/src/main/java/overview.html"
+}
+
+task sourcesJar(type: Jar, dependsOn:classes) {
+    classifier = "sources"
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar) {
+    classifier = "javadoc"
+    from javadoc
+}
+
+
+artifacts {
+    archives sourcesJar
+    //archives javadocJar
+}
+
+task saveJars << {
+    def saveDir="${rootProject.projectDir}/build/export-dependency"
+    ant.delete (dir:saveDir, failonerror:false)
+    configurations.compile.each { File file ->
+        println file.name
+        ant.copy (file: file, overwrite:true, todir:saveDir)
+     }
+}
+
+//----------------------------------------------------------
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
+eclipse.classpath.file {
+    whenMerged{cp ->
+        cp.entries.findAll { it instanceof SourceFolder && it.path.startsWith("src/main/java") }*.output = "build/classes/main"
+        cp.entries.findAll { it instanceof SourceFolder && it.path.startsWith("src/main/resources") }*.output = "build/classes/main"    //build/resources/main
+        cp.entries.findAll { it instanceof SourceFolder && it.path.startsWith("src/test/java") }*.output = "build/classes/test"
+        cp.entries.findAll { it instanceof SourceFolder && it.path.startsWith("src/test/resources") }*.output = "build/classes/test"    //build/resources/test
+    }
+}
+
+eclipseJdt << {
+    File f = file(".settings/org.eclipse.core.resources.prefs")
+    f.write("eclipse.preferences.version=1\n")
+    f.append("encoding/<project>=utf-8")
+}

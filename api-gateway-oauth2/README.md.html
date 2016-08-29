@@ -1,0 +1,60 @@
+﻿<!doctype html public '-//W3C//DTD HTML 4.0 Transitional //EN'>
+<html>
+<head>
+<title>README</title>
+<meta charset='UTF-8' />
+<meta name='generator' content='EverEdit' />
+<link href='D:\Apps\Dev\everedit32\mode\markdown\default.css' rel='stylesheet'></link>
+<link href='D:\Apps\Dev\everedit32\mode\markdown\prettify.css' rel='stylesheet'></link>
+<script type='text/javascript' src='D:\Apps\Dev\everedit32\mode\markdown\prettify.js'></script>
+<script type='text/javascript' src='D:\Apps\Dev\everedit32\mode\markdown\jquery-1.10.2.min.js'></script>
+<script type='text/javascript' src='D:\Apps\Dev\everedit32\mode\markdown\toc.js'></script>
+</head>
+<body>
+<div id='generated-toc'></div>
+<p><a href="http://travis-ci.org/rajithd/spring-boot-oauth2"><img src="https://secure.travis-ci.org/rajithd/spring-boot-oauth2.png" alt="Build Status" title="" /></a></p>
+
+<h1>Build and Run</h1>
+
+<pre><code class="java">mvn clean install -DskipTests spring-boot:run</code></pre>
+
+<h1>Usage</h1>
+
+<h3>Checking app is deployed sucessfullly</h3>
+
+<pre><code class="sh">curl -i http://localhost:9191/api/hello
+Hello User!</code></pre>
+
+<h3>Access secure resource with token</h3>
+
+<pre><code class="sh">curl -i http://localhost:9191/api/secure
+
+{"timestamp":1444985908768,"status":401,"error":"Unauthorized","message":"Access Denied","path":"/api/secure"}</code></pre>
+
+<h3>Fetching refresh_token</h3>
+
+<pre><code class="sh">curl rajithapp:secret@localhost:9191/api/oauth/token -d grant_type=password -d username=admin -d password=admin
+
+{"access_token":"91202244-431f-444a-b053-7f50716f2012","token_type":"bearer","refresh_token":"e6f8624f-213d-4343-a971-980e83f734be","expires_in":1738,"scope":"read write"}</code></pre>
+
+<h3>Fetching acess_token by submitting refresh_token</h3>
+
+<pre><code class="sh">curl rajithapp:secret@localhost:9191/api/oauth/token -d grant_type=refresh_token -d refresh_token=&lt;refresh_token&gt;
+
+{"access_token":"821c99d4-2c9f-4990-b68d-18eacaff54b2","token_type":"bearer","refresh_token":"e6f8624f-213d-4343-a971-980e83f734be","expires_in":1799,"scope":"read write"}</code></pre>
+
+<h3>Access secure resource sucessfully</h3>
+
+<pre><code class="sh">curl -i -H "Authorization: Bearer &lt;access_token&gt;" http://localhost:9191/api/secure
+
+Secure Hello!</code></pre>
+<script type='text/javascript'>
+$(document).ready(function(){
+  if($('code').length>0){
+    $('code').parent().addClass('prettyprint linenums');
+    prettyPrint();
+};
+});
+</script>
+</body>
+</html>
